@@ -35,11 +35,11 @@ jobs:
     if: success()
 
     steps:
-    - name: 📤 Send Discord notification
-      env:
-        DISCORD_WEBHOOK_URL: ${{ secrets.WEB_HOOK_THREAD }}
-      run: |
-        curl -H "Content-Type: application/json" \
-             -X POST \
-             -d "{\"content\": \"🧪 \`${{ github.workflow }}\` finished with status: **${{ needs.docker-test.result }}** on branch \`${GITHUB_REF##*/}\`. 👉 [View Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\"}" \
-             $DISCORD_WEBHOOK_URL
+      - name: 📤 Send Discord notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.WEB_HOOK_THREAD }}
+        run: |
+          curl -H "Content-Type: application/json" \
+              -X POST \
+              -d "{\"content\": \"🧪 \`${{ github.workflow }}\` finished with status: **${{ needs.docker-test.result }}** on branch \`${GITHUB_REF##*/}\`. 👉 [View Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\"}" \
+              "$DISCORD_WEBHOOK_URL"
