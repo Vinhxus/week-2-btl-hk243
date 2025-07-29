@@ -1,0 +1,45 @@
+name: C++ Build and Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docker-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🐳 Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: .github/workflows/Dockerfile
+        tags: cpp-dev-env:latest
+        load: true  
+
+    - name: 🔧 Compile and Run Tests
+      run: |
+        docker run --rm -v ${{ github.workspace }}:/app -w /app cpp-dev-env:latest bash -c "
+          g++ -std=c++17 -fsanitize=address -fno-omit-frame-pointer -g -O0 -Wall -Wextra -I. -Isrc main.cpp tests/*.cpp build/DoublyLinkedList.o -o main &&
+          ./main
+        "
+
+  notify-discord:
+    needs: docker-test
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+    - name: 📤 Send Discord notification
+      env:
+        DISCORD_WEBHOOK_URL: ${{ secrets.WEB_HOOK_THREAD }}
+      run: |
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d "{\"content\": \"🧪 \`${{ github.workflow }}\` finished with status: **${{ needs.docker-test.result }}** on branch \`${GITHUB_REF##*/}\`. 👉 [View Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\"}" \
+             $DISCORD_WEBHOOK_URL
