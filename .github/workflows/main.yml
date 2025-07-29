@@ -30,16 +30,32 @@ jobs:
         "
 
   notify-discord:
-    needs: docker-test
+    needs: [docker-test]
     runs-on: ubuntu-latest
     if: success()
-
     steps:
       - name: 📤 Send Discord notification
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.WEB_HOOK_THREAD }}
         run: |
+          AUTHOR_NAME="${{ github.actor }}"
+          EVENT_NAME="${{ github.event_name }}"
+          REPO_NAME="${{ github.repository }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          
+          if [ "$EVENT_NAME" == "pull_request" ]; then
+            HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+            BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+            BRANCH_INFO="\`${HEAD_BRANCH}\` → \`${BASE_BRANCH}\`"
+          else
+            CURRENT_BRANCH="${GITHUB_REF##*/}"
+            BRANCH_INFO="\`${CURRENT_BRANCH}\`"
+          fi
+
+          # Gửi message tới Discord
           curl -H "Content-Type: application/json" \
-              -X POST \
-              -d "{\"content\": \"🧪 \`${{ github.workflow }}\` finished with status: **${{ needs.docker-test.result }}** on branch \`${GITHUB_REF##*/}\`. 👉 [View Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\"}" \
-              "$DISCORD_WEBHOOK_URL"
+            -X POST \
+            -d @- "$DISCORD_WEBHOOK_URL" <<EOF
+          {
+            "content": "✅ \`${{ github.workflow }}\` passed!\n**Author:** ${AUTHOR_NAME}\n**Branch:** ${BRANCH_INFO}\n**Event:** \`${EVENT_NAME}\`\n**Commit:** ${COMMIT_MSG}\n👉 [View Run](${{ github.server_url }}/${REPO_NAME}/actions/runs/${{ github.run_id }})"
+          }
