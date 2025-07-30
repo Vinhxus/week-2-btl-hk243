@@ -66,3 +66,4 @@ jobs:
           {
             "content": "${EMOJI} \`${{ github.workflow }}\` ${STATUS}!\n**Author:** ${AUTHOR_NAME}\n**Branch:** ${BRANCH_INFO}\n**Event:** \`${EVENT_NAME}\`\n**Commit:** ${COMMIT_MSG}\n👉 [View Run](${{ github.server_url }}/${REPO_NAME}/actions/runs/${{ github.run_id }})"
           }
+          EOF
