@@ -28,11 +28,11 @@ jobs:
           g++ -std=c++17 -fsanitize=address -fno-omit-frame-pointer -g -O0 -Wall -Wextra -I. -Isrc main.cpp tests/*.cpp build/DoublyLinkedList.o -o main &&
           ./main
         "
-
+  
   notify-discord:
     needs: [docker-test]
     runs-on: ubuntu-latest
-    if: success()
+    if: always()
     steps:
       - name: 📤 Send Discord notification
         env:
@@ -42,6 +42,7 @@ jobs:
           EVENT_NAME="${{ github.event_name }}"
           REPO_NAME="${{ github.repository }}"
           COMMIT_MSG="${{ github.event.head_commit.message }}"
+          STATUS="${{ needs.docker-test.result }}"
           
           if [ "$EVENT_NAME" == "pull_request" ]; then
             HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
@@ -51,11 +52,17 @@ jobs:
             CURRENT_BRANCH="${GITHUB_REF##*/}"
             BRANCH_INFO="\`${CURRENT_BRANCH}\`"
           fi
-
-          # Gửi message tới Discord
+  
+          # Emoji tuỳ theo trạng thái
+          if [ "$STATUS" == "success" ]; then
+            EMOJI="✅"
+          else
+            EMOJI="❌"
+          fi
+  
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- "$DISCORD_WEBHOOK_URL" <<EOF
           {
-            "content": "✅ \`${{ github.workflow }}\` passed!\n**Author:** ${AUTHOR_NAME}\n**Branch:** ${BRANCH_INFO}\n**Event:** \`${EVENT_NAME}\`\n**Commit:** ${COMMIT_MSG}\n👉 [View Run](${{ github.server_url }}/${REPO_NAME}/actions/runs/${{ github.run_id }})"
+            "content": "${EMOJI} \`${{ github.workflow }}\` ${STATUS}!\n**Author:** ${AUTHOR_NAME}\n**Branch:** ${BRANCH_INFO}\n**Event:** \`${EVENT_NAME}\`\n**Commit:** ${COMMIT_MSG}\n👉 [View Run](${{ github.server_url }}/${REPO_NAME}/actions/runs/${{ github.run_id }})"
           }
