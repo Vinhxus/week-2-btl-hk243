@@ -25,16 +25,16 @@ public:
     DoublyLinkedList();
     ~DoublyLinkedList();
 
-    void insertAtHead(T data);
-    void insertAtTail(T data);
-    void insertAt(int index, T data);
+    void insertAtHead(const T& data);
+    void insertAtTail(const T& data);
+    void insertAt(int index, const T& data);
+    int indexOf(const T& item) const;
+    bool contains(const T& item) const;
     void deleteAt(int index);
     T &get(int index) const;
-    int indexOf(T item) const;
-    bool contains(T item) const;
     int size() const;
     void reverse();
-    string toString(string (*convert2str)(T &) = 0) const;
+    string toString(string (*convert2str)(T &) = nullptr) const;
 
     class Iterator
     {

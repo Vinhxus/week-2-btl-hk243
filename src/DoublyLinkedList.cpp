@@ -19,7 +19,7 @@ DoublyLinkedList<T> :: ~DoublyLinkedList(){
 }
 
 template <typename T>
-void DoublyLinkedList<T> :: insertAtHead(T data){
+void DoublyLinkedList<T> :: insertAtHead(const T& data){
     Node* newNode = new Node(data, head, head->next);
     head->next->prev = newNode;
     head->next = newNode;
@@ -27,7 +27,7 @@ void DoublyLinkedList<T> :: insertAtHead(T data){
 }
 
 template <typename T>
-void DoublyLinkedList<T>::insertAtTail(T data) {
+void DoublyLinkedList<T>::insertAtTail(const T& data) {
     Node* newNode = new Node(data, tail->prev, tail);
     tail->prev->next = newNode;
     tail->prev = newNode;
@@ -35,7 +35,7 @@ void DoublyLinkedList<T>::insertAtTail(T data) {
 }
 
 template <typename T>
-void DoublyLinkedList<T> :: insertAt(int index, T data){
+void DoublyLinkedList<T> :: insertAt(int index,const T& data){
     if (index<0 || index > length) return;
     if (index == 0) {
         insertAtHead(data);
@@ -103,7 +103,7 @@ int DoublyLinkedList<T>::size() const {
 template <typename T>
 T& DoublyLinkedList<T> :: get(int index) const{
     if (index < 0 || index >= length) {
-        throw out_of_range("Index is invalid!");
+        throw std::out_of_range("Index is invalid!");
     }
     
     Node* tmp = head->next;
@@ -117,7 +117,7 @@ T& DoublyLinkedList<T> :: get(int index) const{
 }
 
 template <typename T>
-int DoublyLinkedList<T> :: indexOf(T item) const{
+int DoublyLinkedList<T> :: indexOf(const T& item) const{
     Node* tmp = head->next;
     int idx=0;
     while (tmp!=tail){
@@ -129,7 +129,7 @@ int DoublyLinkedList<T> :: indexOf(T item) const{
 }
 
 template <typename T>
-bool DoublyLinkedList<T> :: contains(T item) const{
+bool DoublyLinkedList<T> :: contains(const T& item) const{
     Node* tmp = head->next;
     while (tmp!=tail){
         if ( tmp->data == item) return 1;
